@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RouteSync AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-red: #CC0033; /* Rutgers Scarlet Red */
+            --secondary-bg: #f4f4f9;
+            --sidebar-bg: #ffffff;
+            --map-placeholder-bg: #e9ecef;
+            --text-light: #ffffff;
+            --text-dark: #333333;
+            --text-medium: #555555;
+            --border-color: #dddddd;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: sans-serif;
+            background-color: var(--secondary-bg);
+            display: flex; /* Use flexbox for overall layout */
+            flex-direction: column; /* Stack header and main content vertically */
+        }
+        .header {
+            background-color: var(--primary-red);
+            color: var(--text-light);
+            padding: 10px 20px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8em; /* Increased font size */
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+            flex-shrink: 0; /* Prevent header from shrinking */
+        }
+        .main-content {
+            display: flex; /* Use flexbox for sidebar and map area */
+            flex-grow: 1; /* Allow this area to fill remaining height */
+            overflow: hidden; /* Prevent scrollbars if content overflows slightly */
+        }
+        .sidebar {
+            width: 300px; /* Fixed width for the sidebar */
+            background: var(--sidebar-bg);
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto; /* Add scroll if sidebar content is tall */
+            flex-shrink: 0; /* Prevent sidebar from shrinking */
+            color: var(--text-dark);
+        }
+        .map-area {
+            flex-grow: 1; /* Map area takes remaining width */
+            background-color: var(--map-placeholder-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            color: #aaa;
+        }
+        #map { /* Style for the actual map div */
+            width: 100%;
+            height: 100%;
+            background-color: var(--map-placeholder-bg); /* Placeholder */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .sidebar h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: var(--text-dark);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+         .sidebar label, .sidebar p {
+             margin-bottom: 8px; /* Increased margin */
+             color: var(--text-medium);
+             font-weight: 500; /* Slightly bolder */
+         }
+          .sidebar select, .sidebar button {
+             width: 100%; /* Make form elements fill width */
+             padding: 12px; /* Increased padding */
+             margin-bottom: 15px;
+             border-radius: 5px;
+             border: 1px solid #ccc;
+             box-sizing: border-box; /* Include padding in width */
+             font-size: 1em;
+         }
+         .sidebar button {
+             background-color: var(--primary-red);
+             color: var(--text-light);
+             cursor: pointer;
+             border: none;
+             font-weight: bold;
+             transition: background-color 0.2s ease;
+         }
+         .sidebar button:hover {
+             background-color: #a80029; /* Darker red on hover */
+         }
+         #result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            text-align: left;
+            font-size: 0.9em;
+            color: var(--text-dark);
+        }
+        #result h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            color: var(--primary-red);
+        }
+         #result ul {
+             padding-left: 20px;
+             margin-top: 5px;
+             margin-bottom: 10px;
+             list-style: none; /* Remove default bullets */
+         }
+          #result ul li {
+             margin-bottom: 5px;
+         }
+         #result p {
+             margin-bottom: 10px;
+         }
+        .hidden {
+            display: none;
+        }
+        #error-message {
+            color: var(--primary-red);
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column; /* Stack sidebar and map */
+                overflow-y: auto; /* Allow scrolling for the whole content area */
+            }
+            .sidebar {
+                width: 100%; /* Sidebar takes full width */
+                box-shadow: none; /* Remove side shadow */
+                border-bottom: 1px solid var(--border-color);
+                box-sizing: border-box;
+                max-height: 50vh; /* Limit sidebar height */
+            }
+            .map-area {
+                height: 50vh; /* Give map area fixed height */
+                min-height: 300px; /* Ensure minimum map height */
+                flex-grow: 0; /* Don't allow map to grow */
+            }
+            .header {
+                font-size: 1.5em;
+            }
+             .sidebar h2 {
+                 font-size: 1.2em;
+             }
+             .sidebar select, .sidebar button {
+                padding: 10px;
+             }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="header">RouteSync AI</div>
+
+    <div class="main-content">
+        <div class="sidebar">
+            <h2>Navigation</h2>
+
+            <!-- Placeholder for User Location REMOVED -->
+            <!-- <p><strong>Your Location:</strong> (Not Implemented)</p> -->
+            <!-- <hr style="margin: 15px 0; border-color: var(--border-color);"> -->
+
+            <form id="location-form">
+                <label for="building-select">Input Target Building:</label>
+                <select name="building" id="building-select" required>
+                    <option value="">-- Select Livingston Building --</option>
+                    {% for building in buildings %}
+                    <option value="{{ building }}">{{ building }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit">Find Nearest Stop</button>
+            </form>
+
+             <div id="error-message" class="hidden"></div>
+
+            <!-- Result Display Area -->
+             <div id="result" class="hidden">
+                <h3>Closest Stop Info</h3>
+                <p><strong>For Building:</strong> <span id="building-name"></span></p>
+                <p><strong>Nearest Bus Stop:</strong> <span id="stop-name"></span></p>
+                <hr style="border-color: var(--border-color);">
+                <p><strong>Walking:</strong></p>
+                <ul>
+                    <li>Distance: <span id="walk-dist"></span> miles</li>
+                    <li>Time: <span id="walk-time"></span> minutes</li>
+                </ul>
+                <p><strong>Driving:</strong></p>
+                 <ul>
+                    <li>Distance: <span id="drive-dist"></span> miles</li>
+                    <li>Time: <span id="drive-time"></span> minutes</li>
+                </ul>
+             </div>
+        </div>
+
+        <div class="map-area">
+             <!-- Map display placeholder -->
+             <div id="map">Map Area</div>
+             <!-- Actual map would be rendered here -->
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('location-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            const buildingSelect = document.getElementById('building-select');
+            const selectedBuilding = buildingSelect.value;
+            const resultDiv = document.getElementById('result');
+            const errorDiv = document.getElementById('error-message');
+
+            // Hide previous results/errors
+            resultDiv.classList.add('hidden');
+            errorDiv.classList.add('hidden');
+            errorDiv.textContent = '';
+
+            if (!selectedBuilding) {
+                errorDiv.textContent = 'Please select a building.';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            fetch('/find_nearest_stop', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'building=' + encodeURIComponent(selectedBuilding)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    // Try to parse error message from server response
+                    return response.json().then(err => { throw new Error(err.error || 'Network response error'); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Populate the results in the sidebar
+                document.getElementById('building-name').textContent = data.building_name;
+                document.getElementById('stop-name').textContent = data.nearest_stop.name;
+                document.getElementById('walk-dist').textContent = data.nearest_stop.walking.distance_miles;
+                document.getElementById('walk-time').textContent = data.nearest_stop.walking.time_minutes;
+                document.getElementById('drive-dist').textContent = data.nearest_stop.driving.distance_miles;
+                document.getElementById('drive-time').textContent = data.nearest_stop.driving.time_minutes;
+
+                // Show the result section
+                resultDiv.classList.remove('hidden');
+
+                // Optional: Add map integration here later using the #map div
+                // Example: initMap(data.building_location, data.nearest_stop.location);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                errorDiv.textContent = 'Error: ' + error.message;
+                errorDiv.classList.remove('hidden');
+            });
+        });
+
+        // Optional: Function to initialize Google Map (requires API key and library)
+        // function initMap(buildingLoc, stopLoc) {
+        //     const mapElement = document.getElementById("map");
+        //     mapElement.innerHTML = ''; // Clear placeholder text
+        //     const map = new google.maps.Map(mapElement, {
+        //         zoom: 15,
+        //         center: buildingLoc, // Center map around the building initially
+        //     });
+        //     new google.maps.Marker({
+        //         position: buildingLoc,
+        //         map: map,
+        //         title: "Selected Building",
+        //     });
+        //      new google.maps.Marker({
+        //         position: stopLoc,
+        //         map: map,
+        //         title: "Nearest Bus Stop",
+        //     });
+       // }
+    </script>
+    <!-- Optional: Add Google Maps API script here if needed -->
+    <!-- <script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap"></script> -->
+
+</body>
+</html> 
