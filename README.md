@@ -61,14 +61,6 @@ Given a target building, the application calculates and displays the estimated w
 3.  **Open your web browser** and navigate to the address provided by Flask (usually `http://127.0.0.1:5000` or `http://localhost:5000`).
 
 ## Development Notes
-
-🚀 Quick Tip
-After you paste this into your README.md,
-replace your-username and your-name with your actual GitHub username!
-
-Would you also like a shorter version of this README if you want something faster/minimal?
-(2-min cut-down version) 🚀
-👉 Want it?
 Test
 *   The core pathfinding logic needs to be implemented in `app.py` within the `find_nearest_stop` function, replacing the placeholder data.
 *   Campus map data (building/stop coordinates, graph nodes/edges) needs to be created and loaded, likely from a file (e.g., JSON, CSV).
