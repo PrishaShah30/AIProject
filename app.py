@@ -1,84 +1,112 @@
-from flask import Flask, render_template, request, jsonify
+import heapq
 
-app = Flask(__name__)
-
-# Placeholder for campus map data (nodes, edges, building locations, bus stops)
-# This would likely be loaded from a file (e.g., CSV, JSON, GeoJSON)
-# Focused on Livingston Campus based on provided map
-CAMPUS_DATA = {
-    "buildings": {
-        "Livingston Student Center": {"lat": 40.5235, "lon": -74.4368},
-        "Tillet Hall": {"lat": 40.5230, "lon": -74.4580}, # Note: Tillet is slightly off the main area of the provided map screenshot but often considered Livingston
-        "James Dickson Carr Library": {"lat": 40.5228, "lon": -74.4375},
-        "Lynton Towers (North/South)": {"lat": 40.5245, "lon": -74.4380},
-        "The Quads (1, 2, 3)": {"lat": 40.5205, "lon": -74.4385},
-        "Livingston Recreation Center": {"lat": 40.5190, "lon": -74.4330},
-        "Beck Hall": {"lat": 40.5240, "lon": -74.4400},
-        "Lucy Stone Hall": {"lat": 40.5230, "lon": -74.4350},
-        "Janice H Levin Building": {"lat": 40.5250, "lon": -74.4390},
-        # Add more relevant Livingston buildings if needed
+# --- Graph Definition (distances in meters) ---
+graph = {
+    "Livingston Student Center Bus Stop": {
+        "Rutgers Business School": 240,
+        "Janice H. Levin Building": 320,
+        "Livingston Student Center": 0,
+        "Beck Hall": 400,
+        "James Dickson Carr Library": 160,
+        "Ernest A. Lynton South Towers": 480,
+        "Tillett Hall": 560,
+        "U.S. Post Office": 300,
+        "Lucy Stone Hall": 600,
+        "Livingston Dining Commons": 450,
+        "Quad Three Residence Hall": 500
     },
-    "bus_stops": {
-        "Livingston Plaza (Student Center)": {"lat": 40.5240, "lon": -74.4370},
-        "Quads Stop": {"lat": 40.5200, "lon": -74.4380},
-        "Tillet Hall Stop": {"lat": 40.5228, "lon": -74.4585},
-        "Livingston Gym (Rec Center)": {"lat": 40.5195, "lon": -74.4335},
-        "Lynton Towers Stop": {"lat": 40.5248, "lon": -74.4382},
-        # Add more relevant Livingston stops if needed
+    "Livingston Quads Bus Stop": {
+        "Rutgers Business School": 800,
+        "Janice H. Levin Building": 750,
+        "Livingston Student Center": 700,
+        "Beck Hall": 850,
+        "James Dickson Carr Library": 650,
+        "Ernest A. Lynton South Towers": 200,
+        "Tillett Hall": 250,
+        "U.S. Post Office": 150,
+        "Lucy Stone Hall": 300,
+        "Livingston Dining Commons": 100,
+        "Quad Three Residence Hall": 120
     },
-    "graph": {
-        # Nodes and edges representing paths, distances, travel times would go here
-        # This graph data is crucial for the A* algorithm
+    "Livingston Plaza Bus Stop": {
+        "Rutgers Business School": 400,
+        "Janice H. Levin Building": 100,
+        "Livingston Student Center": 300,
+        "Beck Hall": 300,
+        "James Dickson Carr Library": 450,
+        "Ernest A. Lynton South Towers": 700,
+        "Tillett Hall": 750,
+        "U.S. Post Office": 600,
+        "Lucy Stone Hall": 700,
+        "Livingston Dining Commons": 650,
+        "Quad Three Residence Hall": 680
     }
 }
 
-@app.route('/')
-def index():
-    """Renders the main page with the building selection dropdown."""
-    building_names = list(CAMPUS_DATA["buildings"].keys())
-    return render_template('index.html', buildings=building_names)
+# --- Make edges bidirectional ---
+for src in list(graph):
+    for dest, dist in graph[src].items():
+        if dest not in graph:
+            graph[dest] = {}
+        graph[dest][src] = dist
 
-@app.route('/find_nearest_stop', methods=['POST'])
-def find_nearest_stop():
-    """API endpoint to find the nearest bus stop to a selected building."""
-    selected_building = request.form.get('building')
-    if not selected_building or selected_building not in CAMPUS_DATA["buildings"]:
-        return jsonify({"error": "Invalid building selected"}), 400
+# --- Heuristic Table (estimated distance to closest bus stop) ---
+heuristic_estimates = {
+    "Rutgers Business School": 240,
+    "Janice H. Levin Building": 100,
+    "Livingston Student Center": 0,
+    "Beck Hall": 300,
+    "James Dickson Carr Library": 160,
+    "Ernest A. Lynton South Towers": 200,
+    "Tillett Hall": 250,
+    "U.S. Post Office": 150,
+    "Lucy Stone Hall": 300,
+    "Livingston Dining Commons": 100,
+    "Quad Three Residence Hall": 120,
+    "Livingston Student Center Bus Stop": 0,
+    "Livingston Quads Bus Stop": 0,
+    "Livingston Plaza Bus Stop": 0
+}
 
-    building_location = CAMPUS_DATA["buildings"][selected_building]
+def heuristic(node, goal_nodes):
+    # In this simple case, we precomputed a heuristic estimate per node
+    return heuristic_estimates.get(node, float('inf'))
 
-    # --- A* Algorithm Placeholder ---
-    # TODO: Implement A* or other pathfinding algorithm here
-    # This section should:
-    # 1. Get the selected building's coordinates (building_location).
-    # 2. Access the campus graph data (CAMPUS_DATA['graph']).
-    # 3. Find the nearest bus stop node in the graph to the building.
-    # 4. Calculate walking and driving distances/times using the graph edges.
+# --- A* Algorithm ---
+def a_star(start, goal_nodes):
+    visited = set()
+    pq = [(heuristic(start, goal_nodes), 0, start, [start])]  # (f = g + h, g, node, path)
 
-    # Dummy data for now
-    nearest_stop_name = "Livingston Plaza" # Replace with actual result
-    nearest_stop_location = CAMPUS_DATA["bus_stops"][nearest_stop_name]
-    result = {
-        "building_name": selected_building,
-        "building_location": building_location,
-        "nearest_stop": {
-            "name": nearest_stop_name,
-            "location": nearest_stop_location,
-            "walking": {
-                "distance_miles": 0.5,
-                "time_minutes": 8
-            },
-            "driving": {
-                 # Driving might not be applicable directly *to* the stop
-                 # but could represent time to a nearby pickup point
-                "distance_miles": 0.6,
-                "time_minutes": 2
-            }
-        }
+    while pq:
+        f, cost, current, path = heapq.heappop(pq)
+        if current in goal_nodes:
+            return path, cost
+
+        if current in visited:
+            continue
+        visited.add(current)
+
+        for neighbor, weight in graph[current].items():
+            if neighbor not in visited:
+                g = cost + weight
+                h = heuristic(neighbor, goal_nodes)
+                heapq.heappush(pq, (g + h, g, neighbor, path + [neighbor]))
+
+    return None, float('inf')
+
+# --- Example Usage ---
+if __name__ == "__main__":
+    start_building = "Janice H. Levin Building"
+    bus_stops = {
+        "Livingston Student Center Bus Stop",
+        "Livingston Quads Bus Stop",
+        "Livingston Plaza Bus Stop"
     }
-    # --- End Placeholder ---
 
-    return jsonify(result)
-
-if __name__ == '__main__':
-    app.run(debug=True) 
+    path, total_cost = a_star(start_building, bus_stops)
+    if path:
+        print(f"Shortest path from {start_building} to closest bus stop:")
+        print(" → ".join(path))
+        print(f"Total walking distance: {total_cost} meters")
+    else:
+        print("No path found.")
