@@ -3,43 +3,43 @@ import heapq
 # --- Graph Definition (distances in meters) ---
 graph = {
     "Livingston Student Center Bus Stop": {
-        "Rutgers Business School": 240,
-        "Janice H. Levin Building": 320,
-        "Livingston Student Center": 0,
-        "Beck Hall": 400,
-        "James Dickson Carr Library": 160,
-        "Ernest A. Lynton South Towers": 480,
-        "Tillett Hall": 560,
-        "U.S. Post Office": 300,
-        "Lucy Stone Hall": 600,
-        "Livingston Dining Commons": 450,
-        "Quad Three Residence Hall": 500
+        "Rutgers Business School": 0.2,
+        "Janice H. Levin Building": 0.2,
+        "Livingston Student Center": 0.07,
+        "Beck Hall": 0.2,
+        "James Dickson Carr Library": 0.09,
+        "Ernest A. Lynton South Towers": 0.07,
+        "Tillett Hall": 0.3,
+        "U.S. Post Office": 0.2,
+        "Lucy Stone Hall": 0.2,
+        "Livingston Dining Commons": 0.09,
+        "Quad Three Residence Hall": 0.3
     },
     "Livingston Quads Bus Stop": {
-        "Rutgers Business School": 800,
-        "Janice H. Levin Building": 750,
-        "Livingston Student Center": 700,
-        "Beck Hall": 850,
-        "James Dickson Carr Library": 650,
-        "Ernest A. Lynton South Towers": 200,
-        "Tillett Hall": 250,
-        "U.S. Post Office": 150,
-        "Lucy Stone Hall": 300,
-        "Livingston Dining Commons": 100,
-        "Quad Three Residence Hall": 120
+        "Rutgers Business School": 0.5,
+        "Janice H. Levin Building": 0.4,
+        "Livingston Student Center": 0.3,
+        "Beck Hall": 0.4,
+        "James Dickson Carr Library": 0.3,
+        "Ernest A. Lynton South Towers": 0.4,
+        "Tillett Hall": 0.2,
+        "U.S. Post Office": 0.1,
+        "Lucy Stone Hall": 0.3,
+        "Livingston Dining Commons": 0.3,
+        "Quad Three Residence Hall": 0.1
     },
     "Livingston Plaza Bus Stop": {
-        "Rutgers Business School": 400,
-        "Janice H. Levin Building": 100,
-        "Livingston Student Center": 300,
-        "Beck Hall": 300,
-        "James Dickson Carr Library": 450,
-        "Ernest A. Lynton South Towers": 700,
-        "Tillett Hall": 750,
-        "U.S. Post Office": 600,
-        "Lucy Stone Hall": 700,
-        "Livingston Dining Commons": 650,
-        "Quad Three Residence Hall": 680
+        "Rutgers Business School": 0.2,
+        "Janice H. Levin Building": 0.1,
+        "Livingston Student Center": 0.2,
+        "Beck Hall": 0.2,
+        "James Dickson Carr Library": 0.3,
+        "Ernest A. Lynton South Towers": 0.2,
+        "Tillett Hall": 0.5,
+        "U.S. Post Office": 0.4,
+        "Lucy Stone Hall": 0.3,
+        "Livingston Dining Commons": 0.2,
+        "Quad Three Residence Hall": 0.5 
     }
 }
 
