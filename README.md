@@ -55,7 +55,7 @@ Given a target building, the application calculates and displays the estimated w
 
 2.  **Run the Flask development server:**
     ```bash
-    python app.py
+    python3 app.py
     ```
 
 3.  **Open your web browser** and navigate to the address provided by Flask (usually `http://127.0.0.1:5000` or `http://localhost:5000`).

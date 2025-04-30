@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RouteSync AI</title>
+    <title>RouteSync AI 🤖</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
@@ -18,6 +18,8 @@
             --text-medium: #555555;
             --border-color: #dddddd;
         }
+
+        h3
         html, body {
             height: 100%;
             margin: 0;
@@ -169,10 +171,62 @@
              }
         }
 
+        /* Maintenance Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+        }
+        .modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.3s ease;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            color: var(--text-dark);
+        }
+        .modal-content h3 {
+            margin-top: 0;
+            color: var(--primary-red);
+        }
+
     </style>
+    <!-- Google Maps API Script -->
+    {% if google_maps_api_key %}
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=geometry,places&callback=initMap&v=weekly" defer async></script>
+    {% else %}
+    <!-- Google Maps API Key not found, Map will not load -->
+    <script>function initMap() { console.error('Google Maps API Key is missing.'); document.getElementById('map').textContent = 'Map disabled: API Key missing.'; }</script>
+    {% endif %}
 </head>
 <body>
-    <div class="header">RouteSync AI</div>
+    <!-- Maintenance Mode Modal -->
+    <div id="maintenance-modal" class="modal-overlay {% if maintenance_mode %}visible{% endif %}">
+        <div class="modal-content">
+            <h3>Maintenance Mode</h3>
+            <p>currently on maintenance, big upgrade coming</p>
+        </div>
+    </div>
+
+    <div class="header">RouteSync AI 🤖</div>
+    <h3 id="h3_heading"Currently Only For Livingston Campus</h3>
 
     <div class="main-content">
         <div class="sidebar">
@@ -183,14 +237,14 @@
             <!-- <hr style="margin: 15px 0; border-color: var(--border-color);"> -->
 
             <form id="location-form">
-                <label for="building-select">Input Target Building:</label>
+                <label for="building-select">Where You At? 👀</label>
                 <select name="building" id="building-select" required>
                     <option value="">-- Select Livingston Building --</option>
                     {% for building in buildings %}
                     <option value="{{ building }}">{{ building }}</option>
                     {% endfor %}
                 </select>
-                <button type="submit">Find Nearest Stop</button>
+                <button type="submit">Find Nearest Stop 😭</button>
             </form>
 
              <div id="error-message" class="hidden"></div>
@@ -206,22 +260,43 @@
                     <li>Distance: <span id="walk-dist"></span> miles</li>
                     <li>Time: <span id="walk-time"></span> minutes</li>
                 </ul>
-                <p><strong>Driving:</strong></p>
-                 <ul>
-                    <li>Distance: <span id="drive-dist"></span> miles</li>
-                    <li>Time: <span id="drive-time"></span> minutes</li>
-                </ul>
              </div>
         </div>
 
         <div class="map-area">
-             <!-- Map display placeholder -->
-             <div id="map">Map Area</div>
+             <!-- Map display container -->
+             <div id="map">{% if maintenance_mode %}Map disabled during maintenance.{% endif %}</div>
              <!-- Actual map would be rendered here -->
         </div>
     </div>
 
     <script>
+        let map;
+        let directionsService;
+        let directionsRenderer;
+        let markers = []; // To keep track of markers
+
+        // Initialize the map (called by Google Maps API script)
+        function initMap() {
+            const rutgersLivingstonCenter = { lat: 40.522, lon: -74.438 }; // Centered on Livingston Campus
+            map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 15, // Adjust zoom level as needed
+                center: { lat: rutgersLivingstonCenter.lat, lng: rutgersLivingstonCenter.lon },
+                mapId: 'DEMO_MAP_ID' // Optional: for Cloud-based map styling
+            });
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer();
+            directionsRenderer.setMap(map);
+            console.log("Map initialized.");
+        }
+
+        // Function to clear existing markers and directions
+        function clearMap() {
+            directionsRenderer.setDirections({ routes: [] }); // Clear directions
+            markers.forEach(marker => marker.setMap(null)); // Remove markers
+            markers = [];
+        }
+
         document.getElementById('location-form').addEventListener('submit', function(event) {
             event.preventDefault(); // Prevent the default form submission
 
@@ -229,6 +304,13 @@
             const selectedBuilding = buildingSelect.value;
             const resultDiv = document.getElementById('result');
             const errorDiv = document.getElementById('error-message');
+
+            // Clear map before new request
+            if (typeof google !== 'undefined' && google.maps) {
+                clearMap();
+            } else {
+                console.warn("Google Maps API not loaded yet for clearing.");
+            }
 
             // Hide previous results/errors
             resultDiv.classList.add('hidden');
@@ -250,55 +332,101 @@
             })
             .then(response => {
                 if (!response.ok) {
-                    // Try to parse error message from server response
-                    return response.json().then(err => { throw new Error(err.error || 'Network response error'); });
+                    // Try to parse error JSON from backend
+                    return response.json().then(errData => {
+                        throw new Error(errData.error || `HTTP error! status: ${response.status}`);
+                    }).catch(() => {
+                        // If parsing fails, throw generic error
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    });
                 }
                 return response.json();
             })
             .then(data => {
-                // Populate the results in the sidebar
+                console.log("Data received:", data); // Log received data
+                // Update the results display
                 document.getElementById('building-name').textContent = data.building_name;
                 document.getElementById('stop-name').textContent = data.nearest_stop.name;
                 document.getElementById('walk-dist').textContent = data.nearest_stop.walking.distance_miles;
                 document.getElementById('walk-time').textContent = data.nearest_stop.walking.time_minutes;
-                document.getElementById('drive-dist').textContent = data.nearest_stop.driving.distance_miles;
-                document.getElementById('drive-time').textContent = data.nearest_stop.driving.time_minutes;
 
-                // Show the result section
                 resultDiv.classList.remove('hidden');
 
-                // Optional: Add map integration here later using the #map div
-                // Example: initMap(data.building_location, data.nearest_stop.location);
+                // --- Map Update --- //
+                if (typeof google !== 'undefined' && google.maps) {
+                    const buildingLoc = {
+                        lat: data.building_location.lat,
+                        lng: data.building_location.lon
+                    };
+                    const stopLoc = {
+                        lat: data.nearest_stop.location.lat,
+                        lng: data.nearest_stop.location.lon
+                    };
+
+                    // Clear previous markers/routes
+                    clearMap();
+
+                    // Add new markers
+                    const buildingMarker = new google.maps.Marker({
+                        position: buildingLoc,
+                        map: map,
+                        title: data.building_name,
+                        label: "B" // Building
+                    });
+                    markers.push(buildingMarker);
+
+                    const stopMarker = new google.maps.Marker({
+                        position: stopLoc,
+                        map: map,
+                        title: data.nearest_stop.name,
+                        label: "S" // Stop
+                    });
+                    markers.push(stopMarker);
+
+                    // Calculate and display walking route
+                    const request = {
+                        origin: buildingLoc,
+                        destination: stopLoc,
+                        travelMode: google.maps.TravelMode.WALKING
+                    };
+
+                    directionsService.route(request, function(result, status) {
+                        if (status == google.maps.DirectionsStatus.OK) {
+                            directionsRenderer.setDirections(result);
+                            // Optional: Adjust map bounds to fit route
+                            map.fitBounds(result.routes[0].bounds);
+                        } else {
+                            console.error('Directions request failed due to ' + status);
+                            // Fallback: Draw a straight line if directions fail?
+                            // Or just show markers.
+                        }
+                    });
+
+                } else {
+                    console.error("Google Maps API not loaded.");
+                    document.getElementById('map').textContent = 'Google Maps failed to load.';
+                }
+                // --- End Map Update ---
+
             })
             .catch(error => {
                 console.error('Error:', error);
-                errorDiv.textContent = 'Error: ' + error.message;
+                errorDiv.textContent = 'Error fetching data: ' + error.message;
                 errorDiv.classList.remove('hidden');
             });
         });
 
-        // Optional: Function to initialize Google Map (requires API key and library)
-        // function initMap(buildingLoc, stopLoc) {
-        //     const mapElement = document.getElementById("map");
-        //     mapElement.innerHTML = ''; // Clear placeholder text
-        //     const map = new google.maps.Map(mapElement, {
-        //         zoom: 15,
-        //         center: buildingLoc, // Center map around the building initially
-        //     });
-        //     new google.maps.Marker({
-        //         position: buildingLoc,
-        //         map: map,
-        //         title: "Selected Building",
-        //     });
-        //      new google.maps.Marker({
-        //         position: stopLoc,
-        //         map: map,
-        //         title: "Nearest Bus Stop",
-        //     });
-       // }
-    </script>
-    <!-- Optional: Add Google Maps API script here if needed -->
-    <!-- <script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap"></script> -->
+        // Make initMap globally accessible for the callback
+        window.initMap = initMap;
 
+        // Check for maintenance mode on load
+        const maintenanceModal = document.getElementById('maintenance-modal');
+        if (maintenanceModal.classList.contains('visible')) {
+            console.log("Maintenance mode is active.");
+            // Optionally disable form elements if in maintenance mode
+            document.getElementById('building-select').disabled = true;
+            document.querySelector('#location-form button[type="submit"]').disabled = true;
+        }
+    </script>
 </body>
 </html> 
