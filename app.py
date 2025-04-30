@@ -6,21 +6,21 @@ graph = {
         "Rutgers Business School": 0.2,
         "Janice H. Levin Building": 0.2,
         "Livingston Student Center": 0.07,
-        "Beck Hall": 0.2,
-        "James Dickson Carr Library": 0.09,
+        "Beck Hall": 0.3,
+        "James Dickson Carr Library": 0.2,
         "Ernest A. Lynton South Towers": 0.07,
         "Tillett Hall": 0.3,
-        "U.S. Post Office": 0.2,
+        "U.S. Post Office": 0.3,
         "Lucy Stone Hall": 0.2,
-        "Livingston Dining Commons": 0.09,
-        "Quad Three Residence Hall": 0.3
+        "Livingston Dining Commons": 0.1,
+        "Quad Three Residence Hall": 0.4
     },
     "Livingston Quads Bus Stop": {
         "Rutgers Business School": 0.5,
         "Janice H. Levin Building": 0.4,
         "Livingston Student Center": 0.3,
         "Beck Hall": 0.4,
-        "James Dickson Carr Library": 0.3,
+        "James Dickson Carr Library": 0.4,
         "Ernest A. Lynton South Towers": 0.4,
         "Tillett Hall": 0.2,
         "U.S. Post Office": 0.1,
@@ -29,7 +29,7 @@ graph = {
         "Quad Three Residence Hall": 0.1
     },
     "Livingston Plaza Bus Stop": {
-        "Rutgers Business School": 0.2,
+        "Rutgers Business School": 0.1,
         "Janice H. Levin Building": 0.1,
         "Livingston Student Center": 0.2,
         "Beck Hall": 0.2,
@@ -37,7 +37,7 @@ graph = {
         "Ernest A. Lynton South Towers": 0.2,
         "Tillett Hall": 0.5,
         "U.S. Post Office": 0.4,
-        "Lucy Stone Hall": 0.3,
+        "Lucy Stone Hall": 0.4,
         "Livingston Dining Commons": 0.2,
         "Quad Three Residence Hall": 0.5 
     }
@@ -52,17 +52,17 @@ for src in list(graph):
 
 # --- Heuristic Table (estimated distance to closest bus stop) ---
 heuristic_estimates = {
-    "Rutgers Business School": 240,
-    "Janice H. Levin Building": 100,
-    "Livingston Student Center": 0,
-    "Beck Hall": 300,
-    "James Dickson Carr Library": 160,
-    "Ernest A. Lynton South Towers": 200,
-    "Tillett Hall": 250,
-    "U.S. Post Office": 150,
-    "Lucy Stone Hall": 300,
-    "Livingston Dining Commons": 100,
-    "Quad Three Residence Hall": 120,
+    "Rutgers Business School": 0.2,
+    "Janice H. Levin Building": 0.1,
+    "Livingston Student Center": 0.07,
+    "Beck Hall": 0.2,
+    "James Dickson Carr Library": 0.2,
+    "Ernest A. Lynton South Towers": 0.07,
+    "Tillett Hall": 0.2,
+    "U.S. Post Office": 0.1,
+    "Lucy Stone Hall": 0.2,
+    "Livingston Dining Commons": 0.1,
+    "Quad Three Residence Hall": 0.1,
     "Livingston Student Center Bus Stop": 0,
     "Livingston Quads Bus Stop": 0,
     "Livingston Plaza Bus Stop": 0
