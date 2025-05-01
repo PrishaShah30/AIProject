@@ -238,9 +238,12 @@
              <div id="result" class="hidden">
                 <h3>Closest Stop Info</h3>
                 <p><strong>Building:</strong> <span id="building-name"></span></p>
-                <p><strong>Nearest Stop:</strong> <span id="stop-name"></span></p>
+                <p><strong>Nearest Stop(s):</strong></p>
+                <ul id="stop-list">
+                    <!-- Stop names will be added here by JS -->
+                </ul>
                 <hr>
-                <p><strong>Walking Details:</strong></p>
+                <p><strong>Walking Details (to nearest):</strong></p>
                 <ul>
                     <li>Distance: <span id="walk-dist"></span> miles</li>
                     <li>Est. Time: <span id="walk-time"></span> minutes</li>
@@ -393,46 +396,66 @@
             .then(data => {
                 console.log("Form Submit: Data received successfully:", data);
 
-                // Ensure map is still valid before proceeding
                 if (!map) {
                     console.error("Form Submit Error: Map object became invalid before processing data.");
                     throw new Error("Map became unavailable.");
                 }
 
-                // Update results display
+                // Update results display - Handle multiple stops
                 document.getElementById('building-name').textContent = data.building_name;
-                document.getElementById('stop-name').textContent = data.nearest_stop.name;
-                document.getElementById('walk-dist').textContent = data.nearest_stop.walking.distance_miles;
-                document.getElementById('walk-time').textContent = data.nearest_stop.walking.time_minutes;
+
+                // Clear previous stop list items if any
+                const stopListElement = document.getElementById('stop-list'); // Use a <ul> perhaps
+                stopListElement.innerHTML = ''; // Clear previous entries
+
+                if (data.nearest_stops && data.nearest_stops.length > 0) {
+                    data.nearest_stops.forEach(stop => {
+                        const li = document.createElement('li');
+                        li.textContent = stop.name; // Display stop name
+                        // You could add more info here if needed, like coordinates
+                        stopListElement.appendChild(li);
+                    });
+                } else {
+                    // Handle case where no stops are returned (shouldn't happen if backend logic is correct)
+                     const li = document.createElement('li');
+                     li.textContent = "No stops found.";
+                     stopListElement.appendChild(li);
+                }
+
+                document.getElementById('walk-dist').textContent = data.walking.distance_miles !== null ? data.walking.distance_miles : 'N/A';
+                document.getElementById('walk-time').textContent = data.walking.time_minutes !== null ? data.walking.time_minutes : 'N/A';
                 resultDiv.classList.remove('hidden');
                 console.log("Form Submit: Updated result display.");
 
-                // Update Map
+                // Update Map - Place markers for building and *all* nearest stops
                 const buildingLoc = { lat: data.building_location.lat, lng: data.building_location.lon };
-                const stopLoc = { lat: data.nearest_stop.location.lat, lng: data.nearest_stop.location.lon };
 
                 console.log("Form Submit: Adding markers.");
-                const buildingMarker = new google.maps.Marker({
+                 const buildingMarker = new google.maps.Marker({
                     position: buildingLoc, map: map, title: data.building_name,
                     icon: { url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png' }
                 });
                 markers.push(buildingMarker);
 
-                const stopMarker = new google.maps.Marker({
-                    position: stopLoc, map: map, title: data.nearest_stop.name,
-                    icon: { url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' }
-                 });
-                 markers.push(stopMarker);
+                const bounds = new google.maps.LatLngBounds();
+                bounds.extend(buildingLoc);
 
-                 // Draw path and fit bounds
+                data.nearest_stops.forEach(stop => {
+                    const stopLoc = { lat: stop.location.lat, lng: stop.location.lon };
+                    const stopMarker = new google.maps.Marker({
+                        position: stopLoc, map: map, title: stop.name,
+                        icon: { url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' }
+                     });
+                     markers.push(stopMarker);
+                     bounds.extend(stopLoc); // Extend bounds to include this stop
+                });
+
+
+                 // Draw path coordinates if available (simple building -> first stop)
                  console.log("Form Submit: Preparing to draw path and fit bounds.");
-                 const bounds = new google.maps.LatLngBounds();
-                 bounds.extend(buildingLoc);
-                 bounds.extend(stopLoc);
-
                  if (data.path_coordinates && data.path_coordinates.length > 1) {
-                     console.log("Form Submit: Drawing polyline path.");
-                     const pathCoords = data.path_coordinates.map(coord => ({ lat: coord.lat, lng: coord.lng })); // Ensure lat/lng format
+                     console.log("Form Submit: Drawing polyline path (building to first nearest stop).");
+                     const pathCoords = data.path_coordinates.map(coord => ({ lat: coord.lat, lng: coord.lng }));
                      const flightPath = new google.maps.Polyline({
                          path: pathCoords,
                          geodesic: true,
@@ -441,21 +464,26 @@
                          strokeWeight: 3
                      });
                      flightPath.setMap(map);
-                     markers.push(flightPath); // Add polyline to markers array to clear it later
-                     pathCoords.forEach(coord => bounds.extend(coord)); // Extend bounds to include polyline
+                     markers.push(flightPath);
+                     // Bounds already include building and stops, polyline might refine it slightly
+                     pathCoords.forEach(coord => bounds.extend(coord));
                  } else {
-                     console.log("Form Submit: No detailed path data, bounds fit to markers.");
-                     // Optionally draw a straight line as fallback if needed
+                     console.log("Form Submit: No path data, bounds fit to markers.");
                  }
 
+                // Fit map to show building and all nearest stops
                 try {
                     console.log("Form Submit: Fitting map bounds.");
                     map.fitBounds(bounds);
                 } catch (e) {
                     console.error("Form Submit: Error fitting bounds:", e);
-                    // Handle cases where fitting bounds might fail (e.g., map not fully rendered)
-                    map.setCenter(stopLoc); // Fallback: center on the stop
-                    map.setZoom(16); // Fallback: set a reasonable zoom
+                    // Fallback: center on the building or first stop
+                    if (data.nearest_stops.length > 0) {
+                       map.setCenter({ lat: data.nearest_stops[0].location.lat, lng: data.nearest_stops[0].location.lon });
+                    } else {
+                       map.setCenter(buildingLoc);
+                    }
+                    map.setZoom(16);
                 }
 
                 submitButton.disabled = false;
