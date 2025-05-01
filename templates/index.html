@@ -6,10 +6,10 @@
     <title>RouteSync AI 🤖</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-red: #CC0033; /* Rutgers Scarlet Red */
+            --primary-red: #CC0033;
             --secondary-bg: #f4f4f9;
             --sidebar-bg: #ffffff;
             --map-placeholder-bg: #e9ecef;
@@ -17,194 +17,185 @@
             --text-dark: #333333;
             --text-medium: #555555;
             --border-color: #dddddd;
+            --sidebar-width: 320px; /* Define sidebar width */
         }
 
-        h3
-        html, body {
+        html {
             height: 100%;
-            margin: 0;
-            font-family: sans-serif;
-            background-color: var(--secondary-bg);
-            display: flex; /* Use flexbox for overall layout */
-            flex-direction: column; /* Stack header and main content vertically */
+            box-sizing: border-box;
         }
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+
+        body {
+            height: 100vh; /* Use viewport height */
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--secondary-bg);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Prevent body scroll */
+        }
+
         .header {
             background-color: var(--primary-red);
             color: var(--text-light);
-            padding: 10px 20px;
+            padding: 12px 20px;
             font-family: 'Poppins', sans-serif;
-            font-size: 1.8em; /* Increased font size */
+            font-size: 1.6em;
             font-weight: 600;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             text-align: center;
-            flex-shrink: 0; /* Prevent header from shrinking */
+            flex-shrink: 0; /* Don't allow header to shrink */
         }
+
         .main-content {
-            display: flex; /* Use flexbox for sidebar and map area */
-            flex-grow: 1; /* Allow this area to fill remaining height */
-            overflow: hidden; /* Prevent scrollbars if content overflows slightly */
+            display: flex;
+            flex-grow: 1; /* Fill remaining vertical space */
+            height: 0; /* Fix for flex-grow in some browsers */
+            min-height: 0; /* Fix for flex-grow */
+            overflow: hidden; /* Important: prevent content breaking layout */
         }
+
         .sidebar {
-            width: 300px; /* Fixed width for the sidebar */
+            width: var(--sidebar-width);
             background: var(--sidebar-bg);
             padding: 20px;
             box-shadow: 2px 0 5px rgba(0,0,0,0.1);
             display: flex;
             flex-direction: column;
-            overflow-y: auto; /* Add scroll if sidebar content is tall */
-            flex-shrink: 0; /* Prevent sidebar from shrinking */
+            overflow-y: auto; /* Add scroll ONLY if sidebar content is tall */
+            flex-shrink: 0; /* Don't allow sidebar to shrink */
             color: var(--text-dark);
         }
+
         .map-area {
-            flex-grow: 1; /* Map area takes remaining width */
+            flex-grow: 1; /* Fill remaining horizontal space */
             background-color: var(--map-placeholder-bg);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2em;
-            color: #aaa;
+            position: relative; /* Needed for absolute positioning of map if required by API */
         }
-        #map { /* Style for the actual map div */
+
+        #map {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             background-color: var(--map-placeholder-bg); /* Placeholder */
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
+        /* Sidebar Content Styling */
         .sidebar h2 {
             margin-top: 0;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            font-size: 1.4em;
             color: var(--text-dark);
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 10px;
+            font-family: 'Poppins', sans-serif;
         }
-         .sidebar label, .sidebar p {
-             margin-bottom: 8px; /* Increased margin */
+         .sidebar label {
+             display: block; /* Make label take full width */
+             margin-bottom: 8px;
              color: var(--text-medium);
-             font-weight: 500; /* Slightly bolder */
+             font-weight: 500;
          }
           .sidebar select, .sidebar button {
-             width: 100%; /* Make form elements fill width */
-             padding: 12px; /* Increased padding */
+             width: 100%;
+             padding: 12px;
              margin-bottom: 15px;
              border-radius: 5px;
-             border: 1px solid #ccc;
-             box-sizing: border-box; /* Include padding in width */
+             border: 1px solid var(--border-color);
              font-size: 1em;
+             font-family: inherit; /* Use body font */
+         }
+         .sidebar select {
+             appearance: none; /* Better default styling */
+             background-color: #fff;
+             background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+             background-repeat: no-repeat;
+             background-position: right .7em top 50%;
+             background-size: .65em auto;
          }
          .sidebar button {
              background-color: var(--primary-red);
              color: var(--text-light);
              cursor: pointer;
              border: none;
-             font-weight: bold;
+             font-weight: 500;
              transition: background-color 0.2s ease;
          }
          .sidebar button:hover {
-             background-color: #a80029; /* Darker red on hover */
+             background-color: #a80029; /* Darker red */
          }
+
+         /* Result Display Area Styling */
          #result {
-            margin-top: 20px;
+            margin-top: auto; /* Push result to bottom if sidebar has space */
             padding: 15px;
             border: 1px solid var(--border-color);
             background-color: #f8f9fa;
             border-radius: 5px;
             text-align: left;
-            font-size: 0.9em;
+            font-size: 0.95em;
             color: var(--text-dark);
-        }
-        #result h3 {
+            line-height: 1.5;
+         }
+         #result h3 {
             margin-top: 0;
             margin-bottom: 10px;
             font-size: 1.1em;
             color: var(--primary-red);
-        }
+            font-weight: 500;
+         }
          #result ul {
-             padding-left: 20px;
-             margin-top: 5px;
-             margin-bottom: 10px;
-             list-style: none; /* Remove default bullets */
+             padding-left: 0; /* Adjust list styling */
+             margin: 5px 0 10px 0;
+             list-style: none;
          }
           #result ul li {
              margin-bottom: 5px;
          }
          #result p {
-             margin-bottom: 10px;
+             margin: 5px 0;
          }
-        .hidden {
-            display: none;
-        }
-        #error-message {
+         #result hr {
+             border: none;
+             border-top: 1px solid var(--border-color);
+             margin: 10px 0;
+         }
+         #error-message {
             color: var(--primary-red);
             margin-top: 15px;
-            font-weight: bold;
+            font-weight: 500;
         }
+        .hidden { display: none; }
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .main-content {
-                flex-direction: column; /* Stack sidebar and map */
-                overflow-y: auto; /* Allow scrolling for the whole content area */
-            }
-            .sidebar {
-                width: 100%; /* Sidebar takes full width */
-                box-shadow: none; /* Remove side shadow */
-                border-bottom: 1px solid var(--border-color);
-                box-sizing: border-box;
-                max-height: 50vh; /* Limit sidebar height */
-            }
-            .map-area {
-                height: 50vh; /* Give map area fixed height */
-                min-height: 300px; /* Ensure minimum map height */
-                flex-grow: 0; /* Don't allow map to grow */
-            }
-            .header {
-                font-size: 1.5em;
-            }
-             .sidebar h2 {
-                 font-size: 1.2em;
-             }
-             .sidebar select, .sidebar button {
-                padding: 10px;
-             }
-        }
-
-        /* Maintenance Modal Styles */
+        /* Maintenance Modal Styles (Simplified) */
         .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.6);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0s linear 0.3s;
-        }
-        .modal-overlay.visible {
-            opacity: 1;
-            visibility: visible;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000; opacity: 0; visibility: hidden;
             transition: opacity 0.3s ease;
         }
+        .modal-overlay.visible { opacity: 1; visibility: visible; }
         .modal-content {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
+            background-color: #fff; padding: 30px; border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
+            text-align: center; max-width: 400px; width: 90%;
             color: var(--text-dark);
         }
-        .modal-content h3 {
-            margin-top: 0;
-            color: var(--primary-red);
+        .modal-content h3 { margin-top: 0; color: var(--primary-red); }
+
+        /* Basic Responsive */
+        @media (max-width: 768px) {
+            .main-content { flex-direction: column; height: auto; /* Let content define height */ overflow-y: auto; }
+            .sidebar { width: 100%; box-shadow: none; border-bottom: 1px solid var(--border-color); max-height: 40vh; /* Limit height */ order: 2; /* Show form below map */}
+            .map-area { height: 60vh; min-height: 300px; flex-grow: 0; order: 1; /* Show map first */}
+            .header { font-size: 1.4em; }
+            #result { margin-top: 20px; } /* Remove auto margin */
         }
 
     </style>
@@ -212,8 +203,7 @@
     {% if google_maps_api_key %}
     <script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=geometry,places&callback=initMap&v=weekly" defer async></script>
     {% else %}
-    <!-- Google Maps API Key not found, Map will not load -->
-    <script>function initMap() { console.error('Google Maps API Key is missing.'); document.getElementById('map').textContent = 'Map disabled: API Key missing.'; }</script>
+    <script>function initMap() { console.error('Google Maps API Key is missing.'); document.getElementById('map').innerHTML = '<div style="padding: 20px; text-align: center;">Map disabled: API Key missing.</div>'; }</script>
     {% endif %}
 </head>
 <body>
@@ -221,30 +211,25 @@
     <div id="maintenance-modal" class="modal-overlay {% if maintenance_mode %}visible{% endif %}">
         <div class="modal-content">
             <h3>Maintenance Mode</h3>
-            <p>currently on maintenance, big upgrade coming</p>
+            <p>Currently on maintenance, big upgrade coming.</p>
         </div>
     </div>
 
     <div class="header">RouteSync AI 🤖</div>
-    <h3 id="h3_heading"Currently Only For Livingston Campus</h3>
 
     <div class="main-content">
         <div class="sidebar">
             <h2>Navigation</h2>
 
-            <!-- Placeholder for User Location REMOVED -->
-            <!-- <p><strong>Your Location:</strong> (Not Implemented)</p> -->
-            <!-- <hr style="margin: 15px 0; border-color: var(--border-color);"> -->
-
             <form id="location-form">
-                <label for="building-select">Where You At? 👀</label>
+                <label for="building-select">Where are you?</label>
                 <select name="building" id="building-select" required>
                     <option value="">-- Select Livingston Building --</option>
                     {% for building in buildings %}
                     <option value="{{ building }}">{{ building }}</option>
                     {% endfor %}
                 </select>
-                <button type="submit">Find Nearest Stop 😭</button>
+                <button type="submit">Find Nearest Stop</button>
             </form>
 
              <div id="error-message" class="hidden"></div>
@@ -252,21 +237,28 @@
             <!-- Result Display Area -->
              <div id="result" class="hidden">
                 <h3>Closest Stop Info</h3>
-                <p><strong>For Building:</strong> <span id="building-name"></span></p>
-                <p><strong>Nearest Bus Stop:</strong> <span id="stop-name"></span></p>
-                <hr style="border-color: var(--border-color);">
-                <p><strong>Walking:</strong></p>
+                <p><strong>Building:</strong> <span id="building-name"></span></p>
+                <p><strong>Nearest Stop:</strong> <span id="stop-name"></span></p>
+                <hr>
+                <p><strong>Walking Details:</strong></p>
                 <ul>
                     <li>Distance: <span id="walk-dist"></span> miles</li>
-                    <li>Time: <span id="walk-time"></span> minutes</li>
+                    <li>Est. Time: <span id="walk-time"></span> minutes</li>
                 </ul>
              </div>
         </div>
 
         <div class="map-area">
-             <!-- Map display container -->
-             <div id="map">{% if maintenance_mode %}Map disabled during maintenance.{% endif %}</div>
-             <!-- Actual map would be rendered here -->
+             <div id="map">
+                {% if maintenance_mode %}
+                <div style="padding: 20px; text-align: center;">Map disabled during maintenance.</div>
+                {% elif not google_maps_api_key %}
+                <!-- Message handled by initMap fallback -->
+                {% else %}
+                <!-- Map will be initialized here by JS -->
+                <div style="padding: 20px; text-align: center;">Loading Map...</div>
+                {% endif %}
+            </div>
         </div>
     </div>
 
@@ -278,51 +270,107 @@
 
         // Initialize the map (called by Google Maps API script)
         function initMap() {
-            const rutgersLivingstonCenter = { lat: 40.522, lon: -74.438 }; // Centered on Livingston Campus
-            map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 15, // Adjust zoom level as needed
-                center: { lat: rutgersLivingstonCenter.lat, lng: rutgersLivingstonCenter.lon },
-                mapId: 'DEMO_MAP_ID' // Optional: for Cloud-based map styling
-            });
-            directionsService = new google.maps.DirectionsService();
-            directionsRenderer = new google.maps.DirectionsRenderer();
-            directionsRenderer.setMap(map);
-            console.log("Map initialized.");
+            // Check if already initialized or if API key is missing
+            if (map || !document.getElementById('map')) {
+                console.log("initMap: Aborting - map already initialized or map element missing.");
+                return;
+            }
+
+            const mapElement = document.getElementById('map');
+            {% if not google_maps_api_key %}
+                console.error('initMap: Google Maps API Key is missing.');
+                if (mapElement) mapElement.innerHTML = '<div style="padding: 20px; text-align: center;">Map disabled: API Key missing.</div>';
+                return;
+            {% endif %}
+
+            console.log("initMap: Attempting to initialize map...");
+            const rutgersLivingstonCenter = { lat: 40.522, lng: -74.438 }; // Centered on Livingston Campus
+            try {
+                if (typeof google === 'undefined' || !google.maps) {
+                    throw new Error("Google Maps API script not loaded yet.");
+                }
+
+                map = new google.maps.Map(mapElement, {
+                    zoom: 15,
+                    center: rutgersLivingstonCenter,
+                    mapId: 'DEMO_MAP_ID',
+                    disableDefaultUI: true,
+                    zoomControl: true,
+                    mapTypeControl: true,
+                    streetViewControl: false,
+                    fullscreenControl: true
+                });
+
+                directionsService = new google.maps.DirectionsService();
+                directionsRenderer = new google.maps.DirectionsRenderer({
+                     map: map,
+                     suppressMarkers: true
+                 });
+
+                console.log("initMap: Map initialized successfully.");
+
+            } catch (e) {
+                console.error("initMap: Error initializing Google Map:", e);
+                if (mapElement) mapElement.innerHTML = `<div style="padding: 20px; text-align: center;">Error loading map: ${e.message}</div>`;
+                map = null; // Ensure map is null if initialization failed
+            }
         }
 
         // Function to clear existing markers and directions
-        function clearMap() {
-            directionsRenderer.setDirections({ routes: [] }); // Clear directions
-            markers.forEach(marker => marker.setMap(null)); // Remove markers
+        function clearMapOverlays() {
+            console.log("clearMapOverlays: Clearing overlays.");
+            if (directionsRenderer) {
+                try {
+                    directionsRenderer.setDirections({ routes: [] });
+                } catch (e) {
+                    console.error("Error clearing directions:", e);
+                }
+            }
+            markers.forEach(marker => marker.setMap(null));
             markers = [];
         }
 
         document.getElementById('location-form').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent the default form submission
+            event.preventDefault();
+            console.log("Form submitted.");
 
             const buildingSelect = document.getElementById('building-select');
             const selectedBuilding = buildingSelect.value;
             const resultDiv = document.getElementById('result');
             const errorDiv = document.getElementById('error-message');
+            const submitButton = this.querySelector('button[type="submit"]');
+            const mapElement = document.getElementById('map');
 
-            // Clear map before new request
-            if (typeof google !== 'undefined' && google.maps) {
-                clearMap();
-            } else {
-                console.warn("Google Maps API not loaded yet for clearing.");
+            // --- Pre-submission Checks ---
+            if (!map) { // Check if map object is initialized
+                errorDiv.textContent = 'Map is not ready yet. Please wait or refresh.';
+                errorDiv.classList.remove('hidden');
+                console.error("Form Submit Error: Map object is not initialized.");
+                return;
             }
-
-            // Hide previous results/errors
-            resultDiv.classList.add('hidden');
-            errorDiv.classList.add('hidden');
-            errorDiv.textContent = '';
-
+            if (typeof google === 'undefined' || !google.maps) {
+                errorDiv.textContent = 'Map API not loaded. Cannot calculate route.';
+                errorDiv.classList.remove('hidden');
+                console.error("Form Submit Error: Google Maps API not loaded.");
+                return;
+            }
             if (!selectedBuilding) {
                 errorDiv.textContent = 'Please select a building.';
                 errorDiv.classList.remove('hidden');
                 return;
             }
+            // --- End Checks ---
 
+            // Clear previous state
+            console.log("Form Submit: Clearing previous state.");
+            clearMapOverlays();
+            resultDiv.classList.add('hidden');
+            errorDiv.classList.add('hidden');
+            errorDiv.textContent = '';
+            submitButton.disabled = true;
+            submitButton.textContent = 'Finding...';
+
+            console.log(`Form Submit: Fetching data for building: ${selectedBuilding}`);
             fetch('/find_nearest_stop', {
                 method: 'POST',
                 headers: {
@@ -331,102 +379,112 @@
                 body: 'building=' + encodeURIComponent(selectedBuilding)
             })
             .then(response => {
+                console.log(`Form Submit: Received response status: ${response.status}`);
                 if (!response.ok) {
-                    // Try to parse error JSON from backend
                     return response.json().then(errData => {
-                        throw new Error(errData.error || `HTTP error! status: ${response.status}`);
-                    }).catch(() => {
-                        // If parsing fails, throw generic error
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                        throw new Error(errData.error || `Server error: ${response.status}`);
+                    }).catch((parseError) => {
+                        console.error("Error parsing server error response:", parseError);
+                        throw new Error(`Server error: ${response.status}`);
                     });
                 }
                 return response.json();
             })
             .then(data => {
-                console.log("Data received:", data); // Log received data
-                // Update the results display
+                console.log("Form Submit: Data received successfully:", data);
+
+                // Ensure map is still valid before proceeding
+                if (!map) {
+                    console.error("Form Submit Error: Map object became invalid before processing data.");
+                    throw new Error("Map became unavailable.");
+                }
+
+                // Update results display
                 document.getElementById('building-name').textContent = data.building_name;
                 document.getElementById('stop-name').textContent = data.nearest_stop.name;
                 document.getElementById('walk-dist').textContent = data.nearest_stop.walking.distance_miles;
                 document.getElementById('walk-time').textContent = data.nearest_stop.walking.time_minutes;
-
                 resultDiv.classList.remove('hidden');
+                console.log("Form Submit: Updated result display.");
 
-                // --- Map Update --- //
-                if (typeof google !== 'undefined' && google.maps) {
-                    const buildingLoc = {
-                        lat: data.building_location.lat,
-                        lng: data.building_location.lon
-                    };
-                    const stopLoc = {
-                        lat: data.nearest_stop.location.lat,
-                        lng: data.nearest_stop.location.lon
-                    };
+                // Update Map
+                const buildingLoc = { lat: data.building_location.lat, lng: data.building_location.lon };
+                const stopLoc = { lat: data.nearest_stop.location.lat, lng: data.nearest_stop.location.lon };
 
-                    // Clear previous markers/routes
-                    clearMap();
+                console.log("Form Submit: Adding markers.");
+                const buildingMarker = new google.maps.Marker({
+                    position: buildingLoc, map: map, title: data.building_name,
+                    icon: { url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png' }
+                });
+                markers.push(buildingMarker);
 
-                    // Add new markers
-                    const buildingMarker = new google.maps.Marker({
-                        position: buildingLoc,
-                        map: map,
-                        title: data.building_name,
-                        label: "B" // Building
-                    });
-                    markers.push(buildingMarker);
+                const stopMarker = new google.maps.Marker({
+                    position: stopLoc, map: map, title: data.nearest_stop.name,
+                    icon: { url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' }
+                 });
+                 markers.push(stopMarker);
 
-                    const stopMarker = new google.maps.Marker({
-                        position: stopLoc,
-                        map: map,
-                        title: data.nearest_stop.name,
-                        label: "S" // Stop
-                    });
-                    markers.push(stopMarker);
+                 // Draw path and fit bounds
+                 console.log("Form Submit: Preparing to draw path and fit bounds.");
+                 const bounds = new google.maps.LatLngBounds();
+                 bounds.extend(buildingLoc);
+                 bounds.extend(stopLoc);
 
-                    // Calculate and display walking route
-                    const request = {
-                        origin: buildingLoc,
-                        destination: stopLoc,
-                        travelMode: google.maps.TravelMode.WALKING
-                    };
+                 if (data.path_coordinates && data.path_coordinates.length > 1) {
+                     console.log("Form Submit: Drawing polyline path.");
+                     const pathCoords = data.path_coordinates.map(coord => ({ lat: coord.lat, lng: coord.lng })); // Ensure lat/lng format
+                     const flightPath = new google.maps.Polyline({
+                         path: pathCoords,
+                         geodesic: true,
+                         strokeColor: '#FF0000',
+                         strokeOpacity: 0.8,
+                         strokeWeight: 3
+                     });
+                     flightPath.setMap(map);
+                     markers.push(flightPath); // Add polyline to markers array to clear it later
+                     pathCoords.forEach(coord => bounds.extend(coord)); // Extend bounds to include polyline
+                 } else {
+                     console.log("Form Submit: No detailed path data, bounds fit to markers.");
+                     // Optionally draw a straight line as fallback if needed
+                 }
 
-                    directionsService.route(request, function(result, status) {
-                        if (status == google.maps.DirectionsStatus.OK) {
-                            directionsRenderer.setDirections(result);
-                            // Optional: Adjust map bounds to fit route
-                            map.fitBounds(result.routes[0].bounds);
-                        } else {
-                            console.error('Directions request failed due to ' + status);
-                            // Fallback: Draw a straight line if directions fail?
-                            // Or just show markers.
-                        }
-                    });
-
-                } else {
-                    console.error("Google Maps API not loaded.");
-                    document.getElementById('map').textContent = 'Google Maps failed to load.';
+                try {
+                    console.log("Form Submit: Fitting map bounds.");
+                    map.fitBounds(bounds);
+                } catch (e) {
+                    console.error("Form Submit: Error fitting bounds:", e);
+                    // Handle cases where fitting bounds might fail (e.g., map not fully rendered)
+                    map.setCenter(stopLoc); // Fallback: center on the stop
+                    map.setZoom(16); // Fallback: set a reasonable zoom
                 }
-                // --- End Map Update ---
+
+                submitButton.disabled = false;
+                submitButton.textContent = 'Find Nearest Stop';
+                console.log("Form Submit: Processing complete.");
 
             })
             .catch(error => {
-                console.error('Error:', error);
-                errorDiv.textContent = 'Error fetching data: ' + error.message;
+                console.error('Form Submit: Error fetching or processing data:', error);
+                errorDiv.textContent = 'Error: ' + error.message;
                 errorDiv.classList.remove('hidden');
+                submitButton.disabled = false;
+                submitButton.textContent = 'Find Nearest Stop';
             });
         });
 
-        // Make initMap globally accessible for the callback
+        // Make initMap globally accessible for the Google Maps callback
         window.initMap = initMap;
 
-        // Check for maintenance mode on load
-        const maintenanceModal = document.getElementById('maintenance-modal');
-        if (maintenanceModal.classList.contains('visible')) {
-            console.log("Maintenance mode is active.");
-            // Optionally disable form elements if in maintenance mode
-            document.getElementById('building-select').disabled = true;
-            document.querySelector('#location-form button[type="submit"]').disabled = true;
-        }
+        // Initial check for maintenance mode on load
+         const maintenanceModal = document.getElementById('maintenance-modal');
+         if (maintenanceModal && maintenanceModal.classList.contains('visible')) {
+             console.log("Maintenance mode is active.");
+             try { // Disable form elements if in maintenance mode
+                 document.getElementById('building-select').disabled = true;
+                 document.querySelector('#location-form button[type="submit"]').disabled = true;
+             } catch (e) { console.warn("Could not disable form elements for maintenance.", e); }
+         }
+
     </script>
 </body>
 </html> 
