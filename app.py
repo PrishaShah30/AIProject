@@ -22,7 +22,7 @@ BUILDINGS_DATA = {
     "Livingston Student Center": {"lat": 40.5235, "lon": -74.4368},
     "Tillet Hall": {"lat": 40.5230, "lon": -74.4580},
     "James Dickson Carr Library": {"lat": 40.5228, "lon": -74.4375},
-    "Lynton Towers (North/South)": {"lat": 40.524597, "lon": -74.436456},
+    "Lynton Towers (North/South)": {"lat": 40.523095, "lon": -74.436237},
     "The Quads (1, 2, 3)": {"lat": 40.5205, "lon": -74.4385},
     "Livingston Recreation Center": {"lat": 40.5214, "lon": -74.4318},
     "Beck Hall": {"lat": 40.5240, "lon": -74.4400},
